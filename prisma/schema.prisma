@@ -1,0 +1,336 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  first_name    String    @db.VarChar(255)
+  last_name     String    @db.VarChar(255)
+  email         String?   @unique @db.VarChar(255)
+  address_id    String?   @db.VarChar(255)
+  password      String?   @db.VarChar(255)
+  security_code String?   @db.VarChar(255)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  address Address? @relation(fields: [address_id], references: [id])
+
+  Notification Notification[]
+  RateProduct  RateProduct[]
+  Order        Order[]
+}
+
+model Product {
+  id           String    @id @default(uuid())
+  name         String    @db.VarChar(255)
+  description  String?   @db.VarChar(255)
+  slug         String?   @db.VarChar(255)
+  indicate_for String?   @db.VarChar(255)
+  sleeve       String?   @db.VarChar(255)
+  composition  String?   @db.VarChar(255)
+  collar       String?   @db.VarChar(255)
+  price        Float?    @default(0.00)
+  discount     Float?    @default(0.00)
+  tech         String?   @db.VarChar(255)
+  cor          String?   @db.VarChar(255)
+  gender       String?   @db.VarChar(255)
+  size         Json[]    @default([])
+  categories   Json[]    @default([])
+  club         String?   @db.VarChar(255)
+  image_url    String?   @db.VarChar(255)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  orderItem      OrderItem[]
+  stockMovements StockMovements[]
+  productImages  ProductImages[]
+  productBalance ProductBalance[]
+  productTag     ProductTag[]
+  rateProduct    RateProduct[]
+  brands         Brands[]
+}
+
+model ProductImages {
+  id         String    @id @default(uuid())
+  file_id    String?   @db.VarChar(255)
+  product_id String?   @db.VarChar(255)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+
+  file    File?    @relation(fields: [file_id], references: [id])
+  product Product? @relation(fields: [product_id], references: [id])
+}
+
+model File {
+  id        String    @id @default(uuid())
+  url       String?   @db.VarChar(255)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  productImages ProductImages[]
+}
+
+model ProductBalance {
+  id          String    @id @default(uuid())
+  shop_id     String?   @db.VarChar(255)
+  product_id  String?   @db.VarChar(255)
+  balance_min Decimal?
+  balance     Decimal?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  product Product? @relation(fields: [product_id], references: [id])
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  name      String    @db.VarChar(255)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model Brands {
+  id          String    @id @default(uuid())
+  name        String    @db.VarChar(255)
+  description String?   @db.VarChar(255)
+  product_id  String?   @db.VarChar(255)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  product Product? @relation(fields: [product_id], references: [id])
+}
+
+model Address {
+  id         String    @id @default(uuid())
+  address    String    @db.VarChar(255)
+  city       String?   @db.VarChar(255)
+  state      String?   @db.VarChar(255)
+  district   String?   @db.VarChar(255)
+  complement String?   @db.VarChar(255)
+  cep        String?   @db.VarChar(255)
+  number     String?   @db.VarChar(255)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+
+  user User[]
+}
+
+model Order {
+  id                String    @id @default(uuid())
+  user_id           String?   @db.VarChar(255)
+  payment_method_id String?   @db.VarChar(255)
+  status            String?   @db.VarChar(255)
+  addition          Decimal?  @default(0)
+  descount          Decimal?  @default(0)
+  portage           Decimal?  @default(0)
+  total_price       Decimal?  @default(0)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  deletedAt         DateTime?
+
+  user           User?          @relation(fields: [user_id], references: [id])
+  payment_method PaymentMethod? @relation(fields: [payment_method_id], references: [id])
+
+  orderItem           OrderItem[]
+  pagarme             Pagarme[]
+  CancellationRequest CancellationRequest[]
+  OrderStatus         OrderStatus[]
+}
+
+model OrderItem {
+  id          String    @id @default(uuid())
+  order_id    String    @db.VarChar(255)
+  product_id  String?   @db.VarChar(255)
+  quantity    Decimal?
+  each_price  Decimal?
+  total_price Decimal?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  order   Order    @relation(fields: [order_id], references: [id])
+  product Product? @relation(fields: [product_id], references: [id])
+}
+
+model Traffic {
+  id        String    @id @default(uuid())
+  url       String?   @db.VarChar(255)
+  ipAddress String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model StatusReport {
+  id        String    @id @default(uuid())
+  name      String    @db.VarChar(255)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  ReportProblem ReportProblem[]
+}
+
+model ReportProblem {
+  id               String    @id @default(uuid())
+  title            String    @db.VarChar(255)
+  description      String?   @db.VarChar(255)
+  image_url        String?   @db.VarChar(255)
+  status_report_id String?   @db.VarChar(255)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
+
+  statusReport StatusReport? @relation(fields: [status_report_id], references: [id])
+}
+
+model OrderStatus {
+  id        String    @id @default(uuid())
+  name      String    @db.VarChar(255)
+  order_id  String?   @db.VarChar(255)
+  isActive  Boolean?  @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  order Order? @relation(fields: [order_id], references: [id])
+}
+
+model Notification {
+  id          String    @id @default(uuid())
+  user_id     String?   @db.VarChar(255)
+  customer_id String?   @db.VarChar(255)
+  name        String    @db.VarChar(255)
+  status      Int?      @default(0)
+  description String?   @db.VarChar(255)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  user User? @relation(fields: [user_id], references: [id])
+}
+
+model StockMovements {
+  id            String    @id @default(uuid())
+  product_id    String?   @db.VarChar(255)
+  quantity      Decimal?
+  moviment_type String?   @db.VarChar(255)
+  document_ref  String?   @db.VarChar(255)
+  observations  String?   @default("null") @db.VarChar(255)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  product Product? @relation(fields: [product_id], references: [id])
+}
+
+model Pagarme {
+  id                    String    @id @default(uuid())
+  order_id              String?   @db.VarChar(255)
+  pagarme_order_id      String?   @db.VarChar(255)
+  pagarme_charge_id     String?   @db.VarChar(255)
+  pagarme_order_item_id String?   @db.VarChar(255)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  deletedAt             DateTime?
+
+  order Order? @relation(fields: [order_id], references: [id])
+}
+
+model Tag {
+  id        String    @id @default(uuid())
+  name      String    @db.VarChar(255)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  productTag ProductTag[]
+}
+
+model ProductTag {
+  id         String    @id @default(uuid())
+  product_id String?   @db.VarChar(255)
+  tag_id     String?   @db.VarChar(255)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+
+  product Product? @relation(fields: [product_id], references: [id])
+  tag     Tag?     @relation(fields: [tag_id], references: [id])
+}
+
+model Permission {
+  id          String    @id @default(uuid())
+  name        String    @db.VarChar(255)
+  description String?   @db.VarChar(255)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+}
+
+model RateProduct {
+  id         String    @id @default(uuid())
+  rate       Int
+  likes      Int
+  images     String[]  @default([])
+  product_id String?   @db.VarChar(255)
+  user_id    String?   @db.VarChar(255)
+  title      String?   @db.VarChar(255)
+  comment    String?   @db.VarChar(255)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+
+  product Product? @relation(fields: [product_id], references: [id])
+  user    User?    @relation(fields: [user_id], references: [id])
+}
+
+model StatusCancellation {
+  id        String    @id @default(uuid())
+  name      String    @db.VarChar(255)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  cancellation_request CancellationRequest[]
+}
+
+model CancellationRequest {
+  id                     String    @id @default(uuid())
+  ip_solicitation        String?   @db.VarChar(255)
+  order_id               String?   @db.VarChar(255)
+  status_cancellation_id String?   @db.VarChar(255)
+  device                 Json?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+  deletedAt              DateTime?
+
+  order               Order?              @relation(fields: [order_id], references: [id])
+  status_cancellation StatusCancellation? @relation(fields: [status_cancellation_id], references: [id])
+}
+
+model PaymentMethod {
+  id        String    @id @default(uuid())
+  name      String    @db.VarChar(255)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  Order Order[]
+}
