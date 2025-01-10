@@ -1,6 +1,5 @@
 import 'dotenv/config';
 export const JWT_PRIVATE_KEY = process.env.TOKEN_SECRET;
-export const API_META = "https://api.mit-tech.com.br:5112/api/v1"
 
 export const configOAuth = {
   clientId: process.env.GOOGLE_CLIENT_ID,

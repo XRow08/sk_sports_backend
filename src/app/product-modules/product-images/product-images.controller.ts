@@ -9,12 +9,10 @@ import {
   UseInterceptors,
   UploadedFile,
   Req,
-  UseGuards,
 } from '@nestjs/common';
 import { ProductImagesService } from './product-images.service';
 import { UpdateProductImageDto } from './dto/update-product-image.dto';
 import {
-  ApiBearerAuth,
   ApiBody,
   ApiConsumes,
   ApiOperation,

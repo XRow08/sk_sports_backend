@@ -29,7 +29,7 @@ export class UploadController {
     description: 'Imagem carregada e comprimida com sucesso',
   })
   async uploadImage(@UploadedFile() file: Express.Multer.File) {
-    const imageUrl = `http://localhost:3333/${file.path}`;
+    const imageUrl = `http://srv690281.hstgr.cloud/${file.path}`;
     return { message: 'Success!', imageUrl };
   }
 }
