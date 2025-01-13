@@ -42,13 +42,8 @@ export class ProductImagesController {
   async create(
     @UploadedFile() file: Express.Multer.File,
     @Body() data: UploadImageDto,
-    @Req() request: Request,
   ) {
-    const protocol = request.protocol;
-    const hostname = request.hostname;
-    const port = request.socket.localPort;
-    const fullUrl = `${protocol}://${hostname}${port ? `:${port}` : ''}`;
-    const imageUrl = `${fullUrl}/${file.path}`;
+    const imageUrl = `http://srv690281.hstgr.cloud/${file.path}`;
     return await this.service.create(data, imageUrl);
   }
 

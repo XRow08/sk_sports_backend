@@ -9,7 +9,6 @@ import { ProductsService } from '../product-modules/products/products.service';
 import { PrismaService } from 'src/database/prisma.service';
 import { FilesService } from '../files/files.service';
 import { ProductImagesService } from '../product-modules/product-images/product-images.service';
-import { CategoriesService } from '../product-modules/categories/categories.service';
 
 @Module({
   imports: [
@@ -35,7 +34,6 @@ import { CategoriesService } from '../product-modules/categories/categories.serv
   providers: [
     UploadService,
     ProductsService,
-    CategoriesService,
     PrismaService,
     ProductImagesService,
     FilesService,

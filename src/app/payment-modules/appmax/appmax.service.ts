@@ -13,8 +13,28 @@ export class AppmaxService {
   private readonly apiKey: string;
 
   constructor() {
-    this.apiBaseUrl = "https://homolog.sandboxappmax.com.br/api/v3";
+    this.apiBaseUrl = 'https://admin.appmax.com.br/api/v3';
     this.apiKey = process.env.APPMAX_API_KEY;
+  }
+
+  async createOrder(payload: CreateAppmaxDto) {
+    const paymentPayload = await this.buildPaymentPayload(payload);
+
+    try {
+      const response = await axios.post(
+        `${this.apiBaseUrl}/order`,
+        paymentPayload,
+        {
+          headers: {
+            Authorization: `Bearer ${this.apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+      return response.data;
+    } catch (error) {
+      throw new BadRequestException(error.response?.data || error.message);
+    }
   }
 
   async createPayment(payload: CreateAppmaxDto) {
@@ -38,25 +58,56 @@ export class AppmaxService {
   }
 
   async buildPaymentPayload(payload: CreateAppmaxDto) {
-    const { paymentMethod, ...orderData } = payload;
-    switch (paymentMethod) {
+    switch (payload.paymentMethod) {
       case 'pix':
-        return { ...orderData, payment: { method: 'pix' } };
-      case 'credit_card':
         return {
-          ...orderData,
+          'access-token': this.apiKey,
+          cart: {
+            order_id: payload.order_id,
+          },
+          customer: {
+            customer_id: 22,
+          },
           payment: {
-            method: 'credit_card',
-            card: {
-              number: orderData.number,
-              expiration_date: orderData.expiration_date,
-              cvv: orderData.cvv,
-              holder_name: orderData.holder_name,
+            pix: {
+              document_number: payload.customer.cpf,
+              expiration_date: payload.expiration_date,
+            },
+          },
+        };
+      case 'card':
+        return {
+          'access-token': this.apiKey,
+          cart: {
+            order_id: payload.order_id,
+          },
+          customer: {
+            customer_id: 22,
+          },
+          payment: {
+            CreditCard: {
+              token: payload.token,
+              document_number: payload.customer.cpf,
+              installments: payload.installments,
+              soft_descriptor: 'SK SPORTS',
             },
           },
         };
       case 'boleto':
-        return { ...orderData, payment: { method: 'boleto' } };
+        return {
+          'access-token': this.apiKey,
+          cart: {
+            order_id: payload.order_id,
+          },
+          customer: {
+            customer_id: 22,
+          },
+          payment: {
+            Boleto: {
+              document_number: payload.customer.cpf,
+            },
+          },
+        };
       default:
         throw new BadRequestException('Invalid payment method');
     }

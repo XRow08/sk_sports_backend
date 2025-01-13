@@ -3,15 +3,7 @@ import {
   ApiProperty,
   ApiPropertyOptional,
 } from '@nestjs/swagger';
-import {
-  IsBoolean,
-  IsNotEmpty,
-  IsOptional,
-  IsPositive,
-  IsUrl,
-  MaxLength,
-} from 'class-validator';
-import { Exists } from 'src/validators/Exists.validator';
+import { IsNotEmpty, IsOptional, IsPositive, MaxLength } from 'class-validator';
 
 export class CreateProductDto {
   @IsNotEmpty({ message: 'Preencha o name' })

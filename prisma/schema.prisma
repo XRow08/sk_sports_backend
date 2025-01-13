@@ -57,7 +57,6 @@ model Product {
   productBalance ProductBalance[]
   productTag     ProductTag[]
   rateProduct    RateProduct[]
-  brands         Brands[]
 }
 
 model ProductImages {
@@ -88,26 +87,6 @@ model ProductBalance {
   product_id  String?   @db.VarChar(255)
   balance_min Decimal?
   balance     Decimal?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
-
-  product Product? @relation(fields: [product_id], references: [id])
-}
-
-model Category {
-  id        String    @id @default(uuid())
-  name      String    @db.VarChar(255)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-}
-
-model Brands {
-  id          String    @id @default(uuid())
-  name        String    @db.VarChar(255)
-  description String?   @db.VarChar(255)
-  product_id  String?   @db.VarChar(255)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
@@ -148,7 +127,6 @@ model Order {
   payment_method PaymentMethod? @relation(fields: [payment_method_id], references: [id])
 
   orderItem           OrderItem[]
-  pagarme             Pagarme[]
   CancellationRequest CancellationRequest[]
   OrderStatus         OrderStatus[]
 }
@@ -238,19 +216,6 @@ model StockMovements {
   deletedAt     DateTime?
 
   product Product? @relation(fields: [product_id], references: [id])
-}
-
-model Pagarme {
-  id                    String    @id @default(uuid())
-  order_id              String?   @db.VarChar(255)
-  pagarme_order_id      String?   @db.VarChar(255)
-  pagarme_charge_id     String?   @db.VarChar(255)
-  pagarme_order_item_id String?   @db.VarChar(255)
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
-  deletedAt             DateTime?
-
-  order Order? @relation(fields: [order_id], references: [id])
 }
 
 model Tag {

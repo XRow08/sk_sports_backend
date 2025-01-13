@@ -25,7 +25,6 @@ import { TrafficModule } from './app/traffic/traffic.module';
 import { TrafficMiddleware } from './app/traffic/traffic.middleware';
 import { TrafficService } from './app/traffic/traffic.service';
 import { RateProductModule } from './app/product-modules/rate-product/rate-product.module';
-import { CategoriesModule } from './app/product-modules/categories/categories.module';
 import { JwtGuard } from './guards/jwtGuard';
 import { APP_GUARD } from '@nestjs/core';
 import { UserModule } from './app/user/user.module';
@@ -65,7 +64,6 @@ import { AppmaxModule } from './app/payment-modules/appmax/appmax.module';
     UserModule,
     ProductsModule,
     NotificationsModule,
-    CategoriesModule,
     StockMovementsModule,
     OrdersModule,
     OrdersItemsModule,

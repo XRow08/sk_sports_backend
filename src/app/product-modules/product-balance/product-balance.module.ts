@@ -3,7 +3,6 @@ import { ProductBalanceService } from './product-balance.service';
 import { ProductBalanceController } from './product-balance.controller';
 import { PrismaService } from 'src/database/prisma.service';
 import { ProductsService } from '../products/products.service';
-import { CategoriesService } from '../categories/categories.service';
 import { ProductImagesService } from '../product-images/product-images.service';
 import { FilesService } from 'src/app/files/files.service';
 
@@ -13,7 +12,6 @@ import { FilesService } from 'src/app/files/files.service';
     ProductBalanceService,
     PrismaService,
     ProductsService,
-    CategoriesService,
     ProductImagesService,
     FilesService,
   ],

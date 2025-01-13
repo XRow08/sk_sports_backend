@@ -6,7 +6,6 @@ import { OrdersService } from '../orders/orders.service';
 import { ProductsService } from '../product-modules/products/products.service';
 import { FilesService } from '../files/files.service';
 import { ProductImagesService } from '../product-modules/product-images/product-images.service';
-import { CategoriesService } from '../product-modules/categories/categories.service';
 import { CepService } from '../cep/cep.service';
 
 @Module({
@@ -16,7 +15,6 @@ import { CepService } from '../cep/cep.service';
     PrismaService,
     OrdersService,
     ProductsService,
-    CategoriesService,
     ProductImagesService,
     FilesService,
     OrdersService,

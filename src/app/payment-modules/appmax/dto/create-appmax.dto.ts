@@ -10,6 +10,10 @@ class Customer {
   @ApiPropertyOptional()
   @IsEmail({}, { message: 'Email invalido!' })
   email: string;
+
+  @IsOptional()
+  @ApiPropertyOptional()
+  cpf: string;
 }
 
 class ItemsOrder {
@@ -33,7 +37,15 @@ export class CreateAppmaxDto {
 
   @IsOptional()
   @ApiPropertyOptional()
-  items: ItemsOrder;
+  items: ItemsOrder[];
+
+  @IsOptional()
+  @ApiPropertyOptional()
+  order_id: string;
+
+  @IsOptional()
+  @ApiPropertyOptional()
+  document_number: string;
 
   @IsOptional()
   @ApiPropertyOptional()
@@ -41,17 +53,13 @@ export class CreateAppmaxDto {
 
   @IsOptional()
   @ApiPropertyOptional()
-  number: number;
-
-  @IsOptional()
-  @ApiPropertyOptional()
   expiration_date: string;
 
   @IsOptional()
   @ApiPropertyOptional()
-  cvv: string;
+  token: string;
 
   @IsOptional()
   @ApiPropertyOptional()
-  holder_name: string;
+  installments: number;
 }
