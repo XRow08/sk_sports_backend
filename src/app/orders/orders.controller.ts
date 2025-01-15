@@ -51,6 +51,13 @@ export class OrdersController {
     return this.ordersService.findAll(start, end);
   }
 
+  @Get('orders/user/:user_id')
+  @ApiOperation({ summary: 'Lista todos(as) order do user' })
+  @Public()
+  findAllByUserId(@Param('user_id') user_id: string) {
+    return this.ordersService.findAllByUserId(user_id);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Lista um(a) order' })
   findOne(@Param('id') id: string) {
