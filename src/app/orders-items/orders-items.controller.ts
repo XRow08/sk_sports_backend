@@ -11,6 +11,7 @@ import { OrdersItemsService } from './orders-items.service';
 import { CreateOrdersItemDto } from './dto/create-orders-item.dto';
 import { UpdateOrdersItemDto } from './dto/update-orders-item.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Public } from 'src/middlewares/PublicMiddleware';
 
 @ApiTags('Order Item')
 @Controller('/api/v1/orders-items')
@@ -18,6 +19,7 @@ export class OrdersItemsController {
   constructor(private readonly ordersItemsService: OrdersItemsService) {}
 
   @Post()
+  @Public()
   @ApiOperation({ summary: 'Cria um(a) order item' })
   create(@Body() createOrdersItemDto: CreateOrdersItemDto) {
     return this.ordersItemsService.create(createOrdersItemDto);

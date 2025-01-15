@@ -71,6 +71,7 @@ export class UserService {
   async findByEmail(email: string) {
     return await this.prisma.user.findFirstOrThrow({
       where: { email, deletedAt: null },
+      include: { address: true },
     });
   }
 

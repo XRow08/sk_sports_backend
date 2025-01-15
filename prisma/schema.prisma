@@ -85,8 +85,8 @@ model ProductBalance {
   id          String    @id @default(uuid())
   shop_id     String?   @db.VarChar(255)
   product_id  String?   @db.VarChar(255)
-  balance_min Decimal?
-  balance     Decimal?
+  balance_min Float?
+  balance     Float?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
@@ -111,20 +111,18 @@ model Address {
 }
 
 model Order {
-  id                String    @id @default(uuid())
-  user_id           String?   @db.VarChar(255)
-  payment_method_id String?   @db.VarChar(255)
-  status            String?   @db.VarChar(255)
-  addition          Decimal?  @default(0)
-  descount          Decimal?  @default(0)
-  portage           Decimal?  @default(0)
-  total_price       Decimal?  @default(0)
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  deletedAt         DateTime?
+  id          String    @id @default(uuid())
+  user_id     String?   @db.VarChar(255)
+  status      String?   @db.VarChar(255)
+  addition    Float?    @default(0.00)
+  discount    Float?    @default(0.00)
+  portage     Float?    @default(0.00)
+  total_price Float?    @default(0.00)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
 
-  user           User?          @relation(fields: [user_id], references: [id])
-  payment_method PaymentMethod? @relation(fields: [payment_method_id], references: [id])
+  user User? @relation(fields: [user_id], references: [id])
 
   orderItem           OrderItem[]
   CancellationRequest CancellationRequest[]
@@ -135,9 +133,9 @@ model OrderItem {
   id          String    @id @default(uuid())
   order_id    String    @db.VarChar(255)
   product_id  String?   @db.VarChar(255)
-  quantity    Decimal?
-  each_price  Decimal?
-  total_price Decimal?
+  quantity    Float?
+  each_price  Float?
+  total_price Float?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
@@ -207,7 +205,7 @@ model Notification {
 model StockMovements {
   id            String    @id @default(uuid())
   product_id    String?   @db.VarChar(255)
-  quantity      Decimal?
+  quantity      Float?
   moviment_type String?   @db.VarChar(255)
   document_ref  String?   @db.VarChar(255)
   observations  String?   @default("null") @db.VarChar(255)
@@ -288,14 +286,4 @@ model CancellationRequest {
 
   order               Order?              @relation(fields: [order_id], references: [id])
   status_cancellation StatusCancellation? @relation(fields: [status_cancellation_id], references: [id])
-}
-
-model PaymentMethod {
-  id        String    @id @default(uuid())
-  name      String    @db.VarChar(255)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-
-  Order Order[]
 }

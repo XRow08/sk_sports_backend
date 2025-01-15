@@ -8,10 +8,10 @@ import {
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { PrismaService } from 'src/database/prisma.service';
-import { Decimal } from '@prisma/client/runtime/library';
 import { OrdersItemsService } from '../orders-items/orders-items.service';
 import axios from 'axios';
 import { CepService } from '../cep/cep.service';
+import { calcularPrecoPrazo } from 'correios-brasil';
 
 @Injectable()
 export class OrdersService {
@@ -61,28 +61,6 @@ export class OrdersService {
     });
   }
 
-  async findAllAbandonedByShopId(
-    shop_id: string,
-    startTime?: number,
-    endTime?: number,
-  ) {
-    const where: any = { shop_id, deletedAt: null };
-    if (startTime && endTime) {
-      where.createdAt = {
-        gte: new Date(startTime),
-        lte: new Date(endTime),
-      };
-    }
-    const orders = await this.prisma.order.findMany({ where });
-    const now = Date.now();
-    return orders.filter((order) => {
-      const orderDate = new Date(order.createdAt).getTime();
-      const isOlderThanOneDay = now - orderDate > 24 * 60 * 60 * 1000;
-      const isNotPaid = order.status !== 'paid';
-      return isOlderThanOneDay && isNotPaid;
-    });
-  }
-
   async findAllRefund(startTime?: number, endTime?: number) {
     const where: any = { deletedAt: null };
     if (startTime && endTime) {
@@ -107,16 +85,9 @@ export class OrdersService {
 
   async findAllByUserId(user_id: string) {
     try {
-      const orders = await this.prisma.order.findMany({
+      return await this.prisma.order.findMany({
         where: { user_id, deletedAt: null },
       });
-      return await Promise.all(
-        orders.map(async (order) => {
-          return {
-            ...order,
-          };
-        }),
-      );
     } catch (error) {
       throw new NotFoundException(error.message);
     }
@@ -128,59 +99,61 @@ export class OrdersService {
     const totalPriceBeforeCount =
       orderItems.length > 0
         ? orderItems.reduce((accumulator, item) => {
-            const price = new Decimal(item.product?.price ?? 0);
-            const quantity = new Decimal(item.quantity ?? 0);
-            return accumulator.plus(price.times(quantity));
-          }, new Decimal(0))
-        : new Decimal(0);
-    const descountCoupon =
-      Number(totalPriceBeforeCount) - Number(order.descount);
-    const calculatePortage = descountCoupon + Number(order.addition);
-    let discountedTotalPrice = new Decimal(calculatePortage);
+            const price = item.product.price;
+            const quantity = item.quantity;
+            return accumulator + price * quantity;
+          }, 0)
+        : 0;
+
+    const discountCoupon = totalPriceBeforeCount - (order.discount ?? 0);
+    const calculatePortage = discountCoupon + (order.addition ?? 0);
+    const total_price = calculatePortage;
 
     return this.prisma.order.update({
       where: { id },
-      data: { ...data, total_price: discountedTotalPrice.toNumber() },
+      data: { ...data, total_price },
     });
   }
 
-  /* async calculatePortage(order_id: string, cep: string) {
+  async calculatePortage(order_id: string, cep: string) {
+    const orderItems = await this.orderItemService.findAllByOrderId(order_id);
+    const totalShirts = orderItems.reduce(
+      (sum, item) => sum + item.quantity,
+      0,
+    );
+
+    const args = {
+      sCepOrigem: '81200100',
+      sCepDestino: '21770200',
+      nVlPeso: '1',
+      nCdFormato: '1',
+      nVlComprimento: '20',
+      nVlAltura: '20',
+      nVlLargura: '20',
+      nCdServico: ['04014', '04510'],
+      nVlDiametro: '0',
+    };
+
     try {
-      const order = await this.findOneById(order_id);
-      const shop = await this.prisma.shop.findFirstOrThrow({
-        where: { id: order.shop_id, deletedAt: null },
-        include: { deliveryMode: true, address: true },
-      });
-      const typeDeliver = shop.delivery;
-      const cepInfo = await this.cepService.getCepData(cep);
-      if (typeDeliver === 'REGI') {
-        const deliverMode = shop.deliveryMode.find((e) => {
-          const destinationNormalized = e.destination?.trim().toLowerCase();
-          const bairroNormalized = cepInfo.bairro?.trim().toLowerCase();
-          return destinationNormalized === bairroNormalized;
-        });
-        if (!deliverMode) throw new BadRequestException('No destination');
-        return deliverMode.price;
-      } else if (typeDeliver === 'DIST') {
-        const shopCoordinates = await this.getCoordinates(shop.address.cep);
-        const customerCoordinates = await this.getCoordinates(cep);
-        const distance = await this.calculateDistanceByRoad(
-          shopCoordinates.lat,
-          shopCoordinates.lon,
-          customerCoordinates.lat,
-          customerCoordinates.lon,
-        );
-        const priceKm = shop.deliveryMode.find(
-          (e) => e.destination === '1',
-        ).price;
-        const price = distance * Number(priceKm);
-        return price;
-      }
+      const response = await calcularPrecoPrazo(args);
+      return response[0];
     } catch (error) {
-      throw new BadRequestException(error.message);
+      if (error.response) {
+        throw new Error(
+          `Erro dos Correios: ${error.response.data || error.message}`,
+        );
+      } else if (error.request) {
+        throw new Error(
+          'Erro de conexão com os Correios. Tente novamente mais tarde.',
+        );
+      } else {
+        throw new Error(
+          `Erro ao calcular o frete: ${error.message || 'Erro desconhecido'}`,
+        );
+      }
     }
   }
- */
+
   async getCoordinates(cep: string): Promise<{ lat: number; lon: number }> {
     try {
       const apiKey = process.env.OPENCAGE_API_KEY;

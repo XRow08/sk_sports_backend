@@ -14,7 +14,6 @@ import { PrismaService } from './database/prisma.service';
 import { OrdersModule } from './app/orders/orders.module';
 import { OrdersItemsModule } from './app/orders-items/orders-items.module';
 import { CepModule } from './app/cep/cep.module';
-import { PaymentMethodModule } from './app/payment-modules/payment-method/payment-method.module';
 import { FilesModule } from './app/files/files.module';
 import { ProductImagesModule } from './app/product-modules/product-images/product-images.module';
 import { ProductBalanceModule } from './app/product-modules/product-balance/product-balance.module';
@@ -29,6 +28,7 @@ import { JwtGuard } from './guards/jwtGuard';
 import { APP_GUARD } from '@nestjs/core';
 import { UserModule } from './app/user/user.module';
 import { AppmaxModule } from './app/payment-modules/appmax/appmax.module';
+import { AddressModule } from './app/address/address.module';
 
 @Module({
   imports: [
@@ -63,12 +63,12 @@ import { AppmaxModule } from './app/payment-modules/appmax/appmax.module';
     UploadModule,
     UserModule,
     ProductsModule,
+    AddressModule,
     NotificationsModule,
     StockMovementsModule,
     OrdersModule,
     OrdersItemsModule,
     CepModule,
-    PaymentMethodModule,
     ProductBalanceModule,
     ProductImagesModule,
     FilesModule,

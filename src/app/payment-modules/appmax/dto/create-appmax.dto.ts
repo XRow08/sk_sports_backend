@@ -4,30 +4,16 @@ import { IsEmail, IsOptional } from 'class-validator';
 class Customer {
   @IsOptional()
   @ApiPropertyOptional()
-  name: string;
-
-  @IsOptional()
-  @ApiPropertyOptional()
   @IsEmail({}, { message: 'Email invalido!' })
   email: string;
 
   @IsOptional()
   @ApiPropertyOptional()
   cpf: string;
-}
-
-class ItemsOrder {
-  @IsOptional()
-  @ApiPropertyOptional()
-  product_id: string;
 
   @IsOptional()
   @ApiPropertyOptional()
-  quantity: number;
-
-  @IsOptional()
-  @ApiPropertyOptional()
-  price: number;
+  phone: string;
 }
 
 export class CreateAppmaxDto {
@@ -37,15 +23,7 @@ export class CreateAppmaxDto {
 
   @IsOptional()
   @ApiPropertyOptional()
-  items: ItemsOrder[];
-
-  @IsOptional()
-  @ApiPropertyOptional()
   order_id: string;
-
-  @IsOptional()
-  @ApiPropertyOptional()
-  document_number: string;
 
   @IsOptional()
   @ApiPropertyOptional()

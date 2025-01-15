@@ -71,6 +71,7 @@ export class UserController {
   }
 
   @Patch(':id')
+  @Public()
   @ApiOperation({ summary: 'Atualiza informacoes de um unico usuario' })
   @ApiResponse({
     status: 201,

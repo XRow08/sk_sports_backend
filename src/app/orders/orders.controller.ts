@@ -20,6 +20,7 @@ export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Post()
+  @Public()
   @ApiOperation({ summary: 'Cria um(a) order' })
   create(@Body() createOrderDto: CreateOrderDto) {
     return this.ordersService.create(createOrderDto);
@@ -56,11 +57,12 @@ export class OrdersController {
     return this.ordersService.findOneById(id);
   }
 
- /*  @Get(':id/calculate/portage/:cep')
+  @Get(':id/calculate/portage/:cep')
+  @Public()
   @ApiOperation({ summary: 'Calcula o valor do frete baseado no CEP' })
   calculatePortage(@Param('id') id: string, @Param('cep') cep: string) {
     return this.ordersService.calculatePortage(id, cep);
-  } */
+  }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Atualiza um(a) order' })
