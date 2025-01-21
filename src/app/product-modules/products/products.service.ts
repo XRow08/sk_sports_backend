@@ -56,7 +56,10 @@ export class ProductsService {
     const offset = (page - 1) * limit;
     const products = await this.prisma.product.findMany({
       where: {
-        OR: [{ name: { contains: term, mode: 'insensitive' } }],
+        AND: [
+          { deletedAt: null },
+          { OR: [{ name: { contains: term, mode: 'insensitive' } }] },
+        ],
       },
       skip: offset,
       take: limit,
