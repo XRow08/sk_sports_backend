@@ -105,7 +105,6 @@ export class AppmaxService {
   ) {
     switch (payload.paymentMethod) {
       case 'pix':
-        console.log(customer_id);
         const expiration = await this.getYMDHIS();
         return {
           'access-token': this.apiKey,
@@ -142,5 +141,70 @@ export class AppmaxService {
       default:
         throw new BadRequestException('Invalid payment method');
     }
+  }
+
+  async handleWebhook(payload: any) {
+    console.log(payload); 
+    if (payload['access-token'] !== this.apiKey) {
+      throw new BadRequestException('Invalid access token');
+    }
+    
+    const paymentType = payload.data?.payment_method?.toLowerCase();
+    const status = payload.data?.status?.toLowerCase();
+    const orderId = payload.data?.order_id;
+
+    if (!paymentType || !status || !orderId) {
+      throw new BadRequestException('Invalid webhook payload');
+    }
+
+    switch (paymentType) {
+      case 'pix':
+        return this.handlePixWebhook(status, orderId);
+      case 'credit-card':
+        return this.handleCreditCardWebhook(status, orderId);
+      default:
+        throw new BadRequestException('Unsupported payment type');
+    }
+  }
+
+  private async handlePixWebhook(status: string, orderId: string) {
+    switch (status) {
+      case 'paid':
+        await this.ordersService.updateById(orderId, { status: 'aprovado' });
+        break;
+      case 'canceled':
+        await this.ordersService.updateById(orderId, { status: 'cancelled' });
+        break;
+      case 'waiting_payment':
+        await this.ordersService.updateById(orderId, { status: 'pending' });
+        break;
+      default:
+        throw new BadRequestException('Invalid PIX status');
+    }
+
+    return { success: true };
+  }
+
+  private async handleCreditCardWebhook(status: string, orderId: string) {
+    switch (status) {
+      case 'paid':
+        await this.ordersService.updateById(orderId, { status: 'paid' });
+        break;
+      case 'canceled':
+      case 'chargeback':
+        await this.ordersService.updateById(orderId, { status: 'cancelled' });
+        break;
+      case 'waiting_payment':
+      case 'under_analysis':
+        await this.ordersService.updateById(orderId, { status: 'pending' });
+        break;
+      case 'refused':
+        await this.ordersService.updateById(orderId, { status: 'failed' });
+        break;
+      default:
+        throw new BadRequestException('Invalid credit card status');
+    }
+
+    return { success: true };
   }
 }
