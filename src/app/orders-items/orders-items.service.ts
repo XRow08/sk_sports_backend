@@ -23,15 +23,14 @@ export class OrdersItemsService {
   async create(data: CreateOrdersItemDto) {
     try {
       const product = await this.productService.findOneById(data.product_id);
-      const each_price = Number(product.price);
+      const each_price = product.price
       const total_price = each_price * data.quantity;
-      
-      const payloadItem = {
-        ...data,
-        each_price,
-        total_price,
-      };
-      const item = await this.prisma.orderItem.create({ data: payloadItem });
+
+      const payloadItem = { ...data, each_price, total_price };
+      const item = await this.prisma.orderItem.create({
+        data: payloadItem,
+        include: { product: true },
+      });
       await this.ordersService.updateById(item.order_id, {});
       return item;
     } catch (error) {
@@ -68,7 +67,7 @@ export class OrdersItemsService {
     const item = await this.findOneById(id);
     const quantity = data.quantity || item.quantity;
     const total_price = quantity * Number(item.each_price);
-    
+
     const update = await this.prisma.orderItem.update({
       where: { id },
       data: { ...data, total_price },
