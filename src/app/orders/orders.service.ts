@@ -24,6 +24,14 @@ export class OrdersService {
 
   async create(data: CreateOrderDto) {
     try {
+      const existingOrder = await this.prisma.order.findFirst({
+        where: {
+          user_id: data.user_id,
+          status: 'waiting_payment',
+          deletedAt: null,
+        },
+      });
+      if (existingOrder) return existingOrder;
       return await this.prisma.order.create({ data });
     } catch (error) {
       throw new BadRequestException(error.message);
@@ -96,10 +104,10 @@ export class OrdersService {
   async updateById(id: string, data: UpdateOrderDto) {
     const order = await this.findOneById(id);
     const orderItems = await this.orderItemService.findAllByOrderId(id);
-    
+
     const totalPriceBeforeCount = orderItems.reduce(
       (acc, item) => acc + (Number(item.total_price) || 0),
-      0
+      0,
     );
 
     const discount = Number(order.discount) || 0;

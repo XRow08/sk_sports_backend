@@ -63,21 +63,25 @@ export class AppmaxService {
     const order = await this.ordersService.findOneById(payload.order_id);
     const items = await this.ordersItemsService.findAllByOrderId(order.id);
     const products = items.map((e) => {
-      return {
-        sku: e.product.id,
-        name: e.product.name,
-        qty: e.quantity,
-      };
+      return { sku: e.product.id, name: e.product.name, qty: e.quantity };
     });
+    let total = order.total_price;
+    if (payload.paymentMethod === 'pix') {
+      total = items.reduce((acc, item) => {
+        const itemPrice = item.each_price * (1 - item.product.discount / 100);
+        const itemTotalPrice = itemPrice * item.quantity;
+        return acc + itemTotalPrice;
+      }, 0);
+      total += order.portage;
+    }
     const data = {
       'access-token': this.apiKey,
-      total: order.total_price,
+      total,
       products,
       customer_id,
       shipping: order.portage,
       discount: order.discount,
     };
-
     try {
       const response = await axios.post(`${this.apiBaseUrl}/order`, data);
       return response.data.data.id;
@@ -138,11 +142,11 @@ export class AppmaxService {
   }
 
   async handleWebhook(payload: any) {
-    console.log(payload); 
+    console.log(payload);
     if (payload['access-token'] !== this.apiKey) {
       throw new BadRequestException('Invalid access token');
     }
-    
+
     const paymentType = payload.data?.payment_method?.toLowerCase();
     const status = payload.data?.status?.toLowerCase();
     const orderId = payload.data?.order_id;
