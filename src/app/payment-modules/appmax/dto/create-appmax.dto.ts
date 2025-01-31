@@ -40,4 +40,8 @@ export class CreateAppmaxDto {
   @IsOptional()
   @ApiPropertyOptional()
   installments: number;
+
+  @IsOptional()
+  @ApiPropertyOptional()
+  cvv: string;
 }

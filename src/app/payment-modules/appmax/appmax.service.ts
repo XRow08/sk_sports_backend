@@ -125,6 +125,7 @@ export class AppmaxService {
           payment: {
             CreditCard: {
               token: payload.token,
+              cvv: payload.cvv,
               document_number: payload.customer.cpf,
               installments: payload.installments,
               soft_descriptor: 'SK SPORTS',
