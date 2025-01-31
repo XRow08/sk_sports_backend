@@ -120,7 +120,7 @@ export class AppmaxService {
       case 'credit-card':
         return {
           'access-token': this.apiKey,
-          cart: { order_id: payload.order_id },
+          cart: { order_id },
           customer: { customer_id },
           payment: {
             CreditCard: {
@@ -130,13 +130,6 @@ export class AppmaxService {
               soft_descriptor: 'SK SPORTS',
             },
           },
-        };
-      case 'boleto':
-        return {
-          'access-token': this.apiKey,
-          cart: { order_id: payload.order_id },
-          customer: { customer_id },
-          payment: { Boleto: { document_number: payload.customer.cpf } },
         };
       default:
         throw new BadRequestException('Invalid payment method');

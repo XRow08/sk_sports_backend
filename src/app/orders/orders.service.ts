@@ -96,15 +96,17 @@ export class OrdersService {
   async updateById(id: string, data: UpdateOrderDto) {
     const order = await this.findOneById(id);
     const orderItems = await this.orderItemService.findAllByOrderId(id);
-
+    
     const totalPriceBeforeCount = orderItems.reduce(
-      (acc, item) => acc + Number(item.total_price),
-      0,
+      (acc, item) => acc + (Number(item.total_price) || 0),
+      0
     );
 
-    const discountCoupon = totalPriceBeforeCount - (order.discount ?? 0);
-    const calculatePortage = discountCoupon + (order.addition ?? 0);
-    const total_price = calculatePortage;
+    const discount = Number(order.discount) || 0;
+    const addition = Number(order.addition) || 0;
+
+    const discountCoupon = totalPriceBeforeCount - discount;
+    const total_price = Math.max(0, discountCoupon + addition);
 
     return this.prisma.order.update({
       where: { id },
