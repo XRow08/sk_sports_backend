@@ -23,10 +23,13 @@ export class OrdersItemsService {
   async create(data: CreateOrdersItemDto) {
     try {
       const product = await this.productService.findOneById(data.product_id);
+      const each_price = Number(product.price);
+      const total_price = each_price * data.quantity;
+      
       const payloadItem = {
         ...data,
-        each_price: Number(product.price),
-        total_price: Number(product.price) * data.quantity,
+        each_price,
+        total_price,
       };
       const item = await this.prisma.orderItem.create({ data: payloadItem });
       await this.ordersService.updateById(item.order_id, {});
@@ -63,12 +66,12 @@ export class OrdersItemsService {
 
   async updateById(id: string, data: UpdateOrdersItemDto) {
     const item = await this.findOneById(id);
-    const updatedTotalPrice = data.quantity
-      ? data.quantity * Number(item.each_price)
-      : Number(item.total_price);
+    const quantity = data.quantity || item.quantity;
+    const total_price = quantity * Number(item.each_price);
+    
     const update = await this.prisma.orderItem.update({
       where: { id },
-      data: { ...data, total_price: updatedTotalPrice },
+      data: { ...data, total_price },
     });
     await this.ordersService.updateById(update.order_id, {});
     return update;

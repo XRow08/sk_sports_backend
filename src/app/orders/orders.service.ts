@@ -96,14 +96,11 @@ export class OrdersService {
   async updateById(id: string, data: UpdateOrderDto) {
     const order = await this.findOneById(id);
     const orderItems = await this.orderItemService.findAllByOrderId(id);
-    const totalPriceBeforeCount =
-      orderItems.length > 0
-        ? orderItems.reduce((accumulator, item) => {
-            const price = item.product.price;
-            const quantity = item.quantity;
-            return accumulator + price * quantity;
-          }, 0)
-        : 0;
+
+    const totalPriceBeforeCount = orderItems.reduce(
+      (acc, item) => acc + Number(item.total_price),
+      0,
+    );
 
     const discountCoupon = totalPriceBeforeCount - (order.discount ?? 0);
     const calculatePortage = discountCoupon + (order.addition ?? 0);
