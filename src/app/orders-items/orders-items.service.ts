@@ -17,23 +17,14 @@ export class OrdersItemsService {
     private readonly prisma: PrismaService,
     @Inject(forwardRef(() => OrdersService))
     private readonly ordersService: OrdersService,
-    private readonly productService: ProductsService,
   ) {}
 
   async create(data: CreateOrdersItemDto) {
     try {
-      const product = await this.productService.findOneById(data.product_id);
-      const each_price = product.price
-      const total_price = each_price * data.quantity;
-
-      const payloadItem = { ...data, each_price, total_price };
-      const item = await this.prisma.orderItem.create({
-        data: payloadItem,
-        include: { product: true },
-      });
-      await this.ordersService.updateById(item.order_id, {});
-      return item;
+      console.log(data);
+      return await this.prisma.orderItem.create({ data });
     } catch (error) {
+      console.log(error);
       throw new BadRequestException(error.message);
     }
   }
@@ -64,13 +55,9 @@ export class OrdersItemsService {
   }
 
   async updateById(id: string, data: UpdateOrdersItemDto) {
-    const item = await this.findOneById(id);
-    const quantity = data.quantity || item.quantity;
-    const total_price = quantity * Number(item.each_price);
-
     const update = await this.prisma.orderItem.update({
       where: { id },
-      data: { ...data, total_price },
+      data,
     });
     await this.ordersService.updateById(update.order_id, {});
     return update;

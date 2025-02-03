@@ -10,7 +10,6 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 import { PrismaService } from 'src/database/prisma.service';
 import { OrdersItemsService } from '../orders-items/orders-items.service';
 import axios from 'axios';
-import { CepService } from '../cep/cep.service';
 import { calcularPrecoPrazo } from 'correios-brasil';
 
 @Injectable()
@@ -19,7 +18,6 @@ export class OrdersService {
     private readonly prisma: PrismaService,
     @Inject(forwardRef(() => OrdersItemsService))
     private readonly orderItemService: OrdersItemsService,
-    private readonly cepService: CepService,
   ) {}
 
   async create(data: CreateOrderDto) {
@@ -102,24 +100,11 @@ export class OrdersService {
   }
 
   async updateById(id: string, data: UpdateOrderDto) {
-    const order = await this.findOneById(id);
-    const orderItems = await this.orderItemService.findAllByOrderId(id);
-
-    const totalPriceBeforeCount = orderItems.reduce(
-      (acc, item) => acc + (Number(item.total_price) || 0),
-      0,
-    );
-
-    const discount = Number(order.discount) || 0;
-    const addition = Number(order.addition) || 0;
-
-    const discountCoupon = totalPriceBeforeCount - discount;
-    const total_price = Math.max(0, discountCoupon + addition);
-
-    return this.prisma.order.update({
-      where: { id },
-      data: { ...data, total_price },
-    });
+    try {
+      return this.prisma.order.update({ where: { id }, data });
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
   async calculatePortage(order_id: string, cep: string) {

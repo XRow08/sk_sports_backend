@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Req, Get } from '@nestjs/common';
+import { Controller, Post, Body, Req } from '@nestjs/common';
 import { AppmaxService } from './appmax.service';
 import { CreateAppmaxDto } from './dto/create-appmax.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -21,7 +21,7 @@ export class AppmaxController {
     return this.appmaxService.createPayment(data, clientIp);
   }
 
-  @Get('webhook')
+  @Post('webhook')
   @Public()
   async handleWebhook(@Body() payload: any) {
     console.log(payload);

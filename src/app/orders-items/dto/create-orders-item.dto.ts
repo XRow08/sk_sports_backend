@@ -30,4 +30,12 @@ export class CreateOrdersItemDto {
   @IsOptional()
   @ApiPropertyOptional()
   perso_text: string;
+
+  @IsOptional()
+  @ApiPropertyOptional()
+  each_price: number;
+
+  @IsOptional()
+  @ApiPropertyOptional()
+  total_price: number;
 }

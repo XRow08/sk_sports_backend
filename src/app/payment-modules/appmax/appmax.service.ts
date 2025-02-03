@@ -63,7 +63,7 @@ export class AppmaxService {
     const order = await this.ordersService.findOneById(payload.order_id);
     const items = await this.ordersItemsService.findAllByOrderId(order.id);
     const products = items.map((e) => {
-      return { sku: e.product.id, name: e.product.name, qty: e.quantity };
+      return { sku: e.order_id, name: e.product.name, qty: e.quantity };
     });
     let total = order.total_price;
     if (payload.paymentMethod === 'pix') {
@@ -142,23 +142,18 @@ export class AppmaxService {
   }
 
   async handleWebhook(payload: any) {
-    console.log(payload);
-    if (payload['access-token'] !== this.apiKey) {
-      throw new BadRequestException('Invalid access token');
-    }
-
-    const paymentType = payload.data?.payment_method?.toLowerCase();
+    const isPix = payload.data?.pix_ref;
     const status = payload.data?.status?.toLowerCase();
-    const orderId = payload.data?.order_id;
+    const orderId = payload.data?.bundles?.[0]?.products?.[0]?.sku;
 
-    if (!paymentType || !status || !orderId) {
+    if (!status || !orderId) {
       throw new BadRequestException('Invalid webhook payload');
     }
 
-    switch (paymentType) {
-      case 'pix':
+    switch (!!isPix) {
+      case true:
         return this.handlePixWebhook(status, orderId);
-      case 'credit-card':
+      case false:
         return this.handleCreditCardWebhook(status, orderId);
       default:
         throw new BadRequestException('Unsupported payment type');
@@ -168,12 +163,13 @@ export class AppmaxService {
   private async handlePixWebhook(status: string, orderId: string) {
     switch (status) {
       case 'paid':
-        await this.ordersService.updateById(orderId, { status: 'aprovado' });
+      case 'aprovado':
+        await this.ordersService.updateById(orderId, { status: 'paid' });
         break;
-      case 'canceled':
+      case 'cancelado':
         await this.ordersService.updateById(orderId, { status: 'cancelled' });
         break;
-      case 'waiting_payment':
+      case 'pendente':
         await this.ordersService.updateById(orderId, { status: 'pending' });
         break;
       default:
@@ -186,9 +182,10 @@ export class AppmaxService {
   private async handleCreditCardWebhook(status: string, orderId: string) {
     switch (status) {
       case 'paid':
+      case 'autorizado':
         await this.ordersService.updateById(orderId, { status: 'paid' });
         break;
-      case 'canceled':
+      case 'cancelado':
       case 'chargeback':
         await this.ordersService.updateById(orderId, { status: 'cancelled' });
         break;
