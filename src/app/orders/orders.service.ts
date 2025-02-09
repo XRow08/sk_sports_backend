@@ -44,7 +44,10 @@ export class OrdersService {
         lte: new Date(endTime),
       };
     }
-    return await this.prisma.order.findMany({ where });
+    return await this.prisma.order.findMany({
+      where,
+      include: { user: true },
+    });
   }
 
   async findAllAbandoned(startTime?: number, endTime?: number) {
@@ -57,6 +60,7 @@ export class OrdersService {
     }
     const orders = await this.prisma.order.findMany({
       where,
+      include: { user: true },
     });
     const now = Date.now();
     return orders.filter((order) => {
@@ -75,15 +79,21 @@ export class OrdersService {
         lte: new Date(endTime),
       };
     }
-    const orders = await this.prisma.order.findMany({ where });
+    const orders = await this.prisma.order.findMany({
+      where,
+      include: { user: true },
+    });
     return orders.filter((order) => order.status !== 'refund');
   }
+
 
   async findOneById(id: string) {
     try {
       return await this.prisma.order.findFirstOrThrow({
         where: { id, deletedAt: null },
+        include: { user: true },
       });
+
     } catch (error) {
       throw new NotFoundException(error.message);
     }
@@ -93,7 +103,9 @@ export class OrdersService {
     try {
       return await this.prisma.order.findMany({
         where: { user_id, deletedAt: null },
+        include: { user: true },
       });
+
     } catch (error) {
       throw new NotFoundException(error.message);
     }
